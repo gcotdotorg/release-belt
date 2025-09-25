@@ -10,6 +10,7 @@ use Rarst\ReleaseBelt\Model\FileModel;
 use Rarst\ReleaseBelt\Release;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Http\Response;
+use Slim\Psr7\Stream;
 use Symfony\Component\Finder\SplFileInfo;
 
 /**
@@ -37,6 +38,21 @@ class FileController
             throw new HttpNotFoundException($request);
         }
 
+        if (strtolower(substr($sendFile->getPathname(), 0, 5)) === 's3://') {
+            /*
+             * The regex used below is to ensure that the $fileName contains only
+             * characters ranging from ASCII 128-255 and ASCII 0-31 and 127 are replaced with an empty string
+             */
+            $disposition = 'attachment; filename="'.
+                preg_replace('/[\x00-\x1F\x7F\"]/', ' ', $sendFile->getFilename()).
+                '"';
+            $disposition .= "; filename*=UTF-8''".rawurlencode($sendFile->getFilename());
+
+            $context = stream_context_create(['s3' => ['seekable' => true]]);
+            return $response->withBody(new Stream(fopen($sendFile->getPathname(), 'r', false, $context)))
+                            ->withHeader('Content-Disposition', $disposition);
+        }
         return $response->withFileDownload($sendFile->getRealPath());
+
     }
 }
