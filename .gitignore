@@ -1,9 +1,4 @@
 /vendor
-/public/.htaccess
 /public/css
-/.htaccess
-/config/config.php
-/config.php
-/clover.xml
-/RoboFile.php
-/composer.lock
+/.env
+/.env.production
