@@ -1,0 +1,18 @@
+### PhpStorm template
+.idea
+.DS_Store
+.env
+.env.production
+.git/
+.github/
+Dockerfile
+docker-compose.yml
+docker-compose-dev.yml
+justfile
+p*.xml
+tests
+.dockerignore
+.gitignore
+/*.md
+/composer.*
+start.sh

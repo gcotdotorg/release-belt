@@ -29,6 +29,17 @@ return [
     },
     'debug'                      => false,
     Finder::class                => function (ContainerInterface $container) {
+        $releasedDir = $container->get('release.dir');
+        if (strtolower(substr($releasedDir, 0, 5)) === 's3://') {
+            $credentials = new Aws\Credentials\Credentials(
+                $container->get('s3.accessKey'),
+                $container->get('s3.secretKey')
+            );
+            $s3 = new \Aws\S3\S3Client(
+                ['region' => $container->get('s3.region'), 'credentials' => $credentials, 'version' => 'latest']
+            );
+            $s3->registerStreamWrapper();
+        }
         return (new Finder())->files()->in($container->get('release.dir'));
     },
     Fractal::class               => create()->method('setSerializer', get(PackageSerializer::class)),

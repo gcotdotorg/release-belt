@@ -1,0 +1,11 @@
+services:
+  releasebelt:
+    image: 705098187465.dkr.ecr.us-east-2.amazonaws.com/packages:latest
+    volumes:
+      - .:/var/www/html
+    networks:
+      - npm_proxy
+
+networks:
+  npm_proxy:
+    external: true
