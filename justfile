@@ -40,10 +40,9 @@ _list:
         echo "Install unnecessary for {{ target_env }}"; \
     elif [ {{ target_env }} = 'production' ]; then \
         ssh {{ host_ssh }} 'mkdir -p /var/docker/packages/'; \
-        scp ./docker-compose.yml ./start.sh {{ host_ssh }}:/var/docker/packages/; \
+        scp ./docker-compose.yml ./start.sh ./pull.sh {{ host_ssh }}:/var/docker/packages/; \
         scp ./.env.production {{ host_ssh }}:/var/docker/packages/.env; \
-        ssh {{ host_ssh }} 'chmod +x /var/docker/packages/start.sh'; \
-        ssh {{ host_ssh }} 'cd /var/docker/packages; docker compose pull releasebelt'; \
+        ssh {{ host_ssh }} 'chmod +x /var/docker/packages/*.sh; cd /var/docker/packages; ./pull.sh'; \
     fi
 
 # Deploy (start) code to the target environment

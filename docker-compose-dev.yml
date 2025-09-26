@@ -1,6 +1,7 @@
 services:
   releasebelt:
     image: 705098187465.dkr.ecr.us-east-2.amazonaws.com/packages:latest
+    container_name: gcot-packages
     volumes:
       - .:/var/www/html
     networks:
