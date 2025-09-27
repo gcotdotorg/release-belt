@@ -13,7 +13,7 @@ normal_font := `tput sgr0`
 _list:
     @just --list
 
-# Attach code to PHP runtime image and push to Heroku registry
+# Attach code to PHP runtime image and push to AWS registry
 @build target_env='dev':
     echo "Building version {{ version }} for {{ target_env }}"
     if [ {{ target_env }} = 'local' ] || [ {{ target_env }} = 'dev' ]; then \
@@ -34,6 +34,7 @@ _list:
         echo "Unknown environment: {{ target_env }}"; \
     fi
 
+# Push support files to remote server and pull the latest image from AWS repository
 @install target_env='dev':
     echo "Installing version {{ version }} for {{ target_env }}"
     if [ {{ target_env }} = 'local' ] || [ {{ target_env }} = 'dev' ]; then \
@@ -45,8 +46,8 @@ _list:
         ssh {{ host_ssh }} 'chmod +x /var/docker/packages/*.sh; cd /var/docker/packages; ./pull.sh'; \
     fi
 
-# Deploy (start) code to the target environment
-@deploy target_env='dev':
+# Start services on the target environment
+@up target_env='dev':
     echo "Deploying version {{ version }} to {{ target_env }}"
     if [ {{ target_env }} = 'dev' ]; then \
         docker compose -f docker-compose-dev.yml  up -d; \
@@ -67,7 +68,7 @@ _list:
         echo "Unknown environment: {{ target_env }}"; \
     fi
 
-# Logs of the target environment
+# Show logs from the target environment
 @logs target_env='dev' follow='':
     echo "Logs on {{ target_env }} {{ follow }}"
     if [ {{ target_env }} = 'dev' ]; then \
@@ -97,12 +98,12 @@ _list:
         echo "Unknown environment: {{ target_env }}"; \
     fi
 
-# Reboot (down + deploy) services in target environment
+# Reboot (down + up) services in target environment
 @reboot target_env='dev':
     echo "Restarting services on {{ target_env }}"
     if [ {{ target_env }} = 'dev' ] || [ {{ target_env }} = 'production' ]; then \
         just down {{ target_env }}; \
-        just deploy {{ target_env }}; \
+        just up {{ target_env }}; \
     else \
         echo "Unknown environment: {{ target_env }}"; \
     fi
@@ -130,7 +131,7 @@ _list:
         cat VERSION; \
     fi
 
-# Retrieve an authentication token for the AWS registry
+# Retrieve an authentication token for the AWS repository
 @auth:
-    echo "Obtaining authentication token for AWS ECR container registry"; \
+    echo "Obtaining authentication token for AWS ECR container repository"; \
     aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 705098187465.dkr.ecr.us-east-2.amazonaws.com
